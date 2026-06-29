@@ -3,7 +3,7 @@ version: '3' # 指定 Docker Compose 的版本
 
 services: # 定義所有要啟動的服務
   rabbitmq: # RabbitMQ 服務，負責訊息佇列管理
-    image: rabbitmq:3-management # 使用帶有管理介面的 RabbitMQ 映像檔
+    image: rabbitmq:3.13-management-alpine # 使用帶有管理介面的 RabbitMQ 映像檔
     container_name: rabbitmq
     ports:
       - "5672:5672"   # 映射 RabbitMQ 的訊息傳遞連接埠（預設 port）
