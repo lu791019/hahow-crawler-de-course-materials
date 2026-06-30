@@ -1,10 +1,12 @@
-# 整合版 B：本地 build（老師 Mac 用 / DockerHub image 有問題時備用）
-# docker compose -f docker-compose-local.yml up -d
+# 整合版：本地 build（老師 Mac 用 / DockerHub image 有問題時備用）
+# docker compose -f docker-compose-local.yml up -d --build rabbitmq flower mysql phpmyadmin worker
+# 等 worker ready 後：docker compose -f docker-compose-local.yml up producer
 
 services:
   rabbitmq:
     image: rabbitmq:3.13-management-alpine
     container_name: rabbitmq
+    restart: unless-stopped
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -15,6 +17,7 @@ services:
   flower:
     image: mher/flower:latest
     container_name: flower
+    restart: unless-stopped
     ports:
       - "5555:5555"
     depends_on:
@@ -24,12 +27,12 @@ services:
   mysql:
     image: mysql:8.0
     container_name: mysql
+    restart: unless-stopped
     ports:
       - "3306:3306"
     environment:
       MYSQL_DATABASE: hahow
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-1234}
-    restart: always
     volumes:
       - mysql:/var/lib/mysql
     command: --default-authentication-plugin=mysql_native_password
@@ -37,7 +40,7 @@ services:
   phpmyadmin:
     image: phpmyadmin:latest
     container_name: phpmyadmin
-    restart: always
+    restart: unless-stopped
     ports:
       - "8000:80"
     environment:
@@ -49,7 +52,7 @@ services:
     build: .
     container_name: crawler_hahow_worker
     command: uv run python -m celery -A data_ingestion.worker worker --loglevel=info --hostname=worker@%h
-    restart: always
+    restart: unless-stopped
     environment:
       - TZ=Asia/Taipei
       - RABBITMQ_HOST=rabbitmq
